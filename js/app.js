@@ -1,5 +1,29 @@
+
+
 import { db } from './firebase-config.js';
 import { ref, push } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-database.js";
+// Récupère le nom de l'invité depuis l'URL
+const params = new URLSearchParams(window.location.search);
+const inviteName = params.get("invite") ?? "Invité";
+
+// Affiche dans la page
+document.getElementById("invite-name").textContent = inviteName;
+
+// Utilise le nom dans la commande (exemple)
+document.getElementById("order-button").addEventListener("click", () => {
+  const boisson = document.getElementById("drink").value;
+
+  // Exemple d’envoi vers Firebase Realtime Database
+  set(ref(db, 'commandes/' + Date.now()), {
+    invite: inviteName,
+    boisson: boisson,
+    status: 'en attente'
+  });
+
+  alert("Commande envoyée !");
+});
+
+
 
 // Récupère le paramètre invité dans l'URL
 const urlParams = new URLSearchParams(window.location.search);
