@@ -1,26 +1,66 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Commande Boisson - Invité</title>
+  <meta charset="UTF-8">
+  <title>Commande de boisson</title>
 </head>
 <body>
-  <h1>Commande Boisson</h1>
-  <p id="welcome"></p>
+  <h1 id="welcome">Bienvenue !</h1>
 
-  <label for="drink">Choisissez une boisson :</label>
+  <label for="drink">Choisis ta boisson :</label>
   <select id="drink">
+    <option value="Coca">Coca</option>
+    <option value="Fanta">Fanta</option>
     <option value="Eau">Eau</option>
-    <option value="Soda">Soda</option>
-    <option value="Jus">Jus</option>
-    <option value="Bière">Bière</option>
   </select>
-
   <button id="orderBtn">Commander</button>
 
   <p id="status"></p>
 
-  <script type="module" src="js/app.js"></script>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
+    import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-database.js";
+
+    // Config Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyDZTp4sTYq_JUWi3QkbyFqTEm7av-zPmtY",
+      authDomain: "commandeboisson-9f972.firebaseapp.com",
+      databaseURL: "https://commandeboisson-9f972-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "commandeboisson-9f972",
+      storageBucket: "commandeboisson-9f972.appspot.com",
+      messagingSenderId: "847234687672",
+      appId: "1:847234687672:web:170361d30f452d5178ca4d"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    // Récupère le paramètre invité
+    const params = new URLSearchParams(window.location.search);
+    const invite = params.get('invite') || "Invité";
+    document.getElementById('welcome').textContent = `Bonjour ${invite}, passe ta commande !`;
+
+    // Interaction bouton
+    const btn = document.getElementById('orderBtn');
+    const statusEl = document.getElementById('status');
+
+    btn.addEventListener('click', () => {
+      const boisson = document.getElementById('drink').value;
+
+      push(ref(db, 'orders'), {
+        invité: invite,
+        boisson: boisson,
+        statut: "en attente",
+        timestamp: Date.now()
+      })
+      .then(() => {
+        statusEl.textContent = "Commande envoyée, merci !";
+        btn.disabled = true;
+      })
+      .catch((err) => {
+        statusEl.textContent = "Erreur : " + err.message;
+      });
+    });
+  </script>
 </body>
 </html>
